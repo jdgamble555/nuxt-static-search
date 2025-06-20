@@ -59,20 +59,46 @@ export const items: BTTFItem[] = [
 
 
 
-export function useSearch() {
+function fuzzyScore(query: string, text: string): number {
+    query = query.toLowerCase();
+    text = text.toLowerCase();
 
+    let score = 0;
+    let lastIndex = -1;
+
+    for (const char of query) {
+        const index = text.indexOf(char, lastIndex + 1);
+        if (index === -1) return 0;
+        score += 1 / (index - lastIndex);
+        lastIndex = index;
+    }
+
+    return score;
+}
+
+export function useSearch() {
     const query = ref('');
     const results = ref<BTTFItem[]>([]);
 
     function search() {
         const q = query.value.trim().toLowerCase();
-        results.value = q === ''
-            ? []
-            : items.filter(item =>
-                item.title.toLowerCase().includes(q) ||
-                item.description.toLowerCase().includes(q)
-            );
+        if (!q) {
+            results.value = [];
+            return;
+        }
+
+        results.value = items
+            .map(item => {
+                const scoreTitle = fuzzyScore(q, item.title);
+                const scoreDesc = fuzzyScore(q, item.description);
+                const totalScore = scoreTitle * 2 + scoreDesc;
+                return { item, score: totalScore };
+            })
+            .filter(entry => entry.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .map(entry => entry.item);
     }
+
     return {
         query,
         results,
