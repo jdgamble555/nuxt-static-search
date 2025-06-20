@@ -60,8 +60,8 @@ export const items: BTTFItem[] = [
 
 
 function fuzzyScore(query: string, text: string): number {
-    query = query.toLowerCase();
-    text = text.toLowerCase();
+    query = query.replace(/\s+/g, '').toLowerCase();
+    text = text.replace(/\s+/g, '').toLowerCase();
 
     let score = 0;
     let lastIndex = -1;
