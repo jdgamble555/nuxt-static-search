@@ -5,7 +5,6 @@ const { query, results, search } = useSearch();
 <template>
 
   <div class="p-6 max-w-xl mx-auto relative">
-    <!-- Search Input -->
     <input
       type="text"
       v-model="query"
